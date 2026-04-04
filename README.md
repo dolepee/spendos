@@ -1,36 +1,121 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpendOS - Agent Wallet Management
+
+**Stripe Dashboard for AI Agents** - Give agents wallets, not blank checks.
+
+SpendOS is a dashboard for managing AI agent spending limits, API keys, and transaction policies. Built for the [Open Wallet Standard](https://github.com/open-wallet-standard/core) hackathon.
+
+## Live Demo
+
+🔗 **https://spendos-ten.vercel.app**
+
+## What is SpendOS?
+
+SpendOS solves the problem of giving AI agents access to wallets without giving them unlimited funds. It's the missing trust layer for autonomous agents.
+
+```
+┌─────────────┐      ┌──────────────┐      ┌─────────┐
+│  AI Agent  │ ──── │   SpendOS   │ ──── │   OWS   │
+│             │      │  Dashboard  │      │ Wallet  │
+└─────────────┘      │             │      └─────────┘
+                      │ • API Keys  │
+                      │ • Limits    │
+                      │ • Policies  │
+                      │ • Audit Logs│
+                      └──────────────┘
+```
+
+## Features
+
+- **Agent Wallet Management** - Create and manage multiple agent wallets
+- **Spending Limits** - Set daily/monthly limits per agent
+- **Chain Restrictions** - Control which chains each agent can use
+- **API Key Generation** - Secure API keys for agent authentication
+- **Real-time Activity** - Monitor all transactions
+- **Policy Enforcement** - Pause, resume, or revoke agents instantly
+
+## Track 02: Agent Spend Governance & Identity
+
+This project demonstrates:
+- Dead man's switch for autonomous agents
+- Policy-based spending controls
+- Agent identity and access management
+
+## Tech Stack
+
+- **Framework:** Next.js 16 + TypeScript
+- **Styling:** Tailwind CSS (Institutional Stripe aesthetic)
+- **Animations:** Framer Motion
+- **Icons:** Lucide React
+- **Database:** SQLite (Prisma) - production-ready for Supabase/PostgreSQL
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
+# Clone the repo
+git clone https://github.com/dolepee/spendos.git
+cd spendos
+
+# Install dependencies
+npm install
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
+# Open http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## OWS Integration
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+SpendOS is designed to work with the [Open Wallet Standard](https://github.com/open-wallet-standard/core) CLI (`ows`):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+# Create an agent wallet
+ows wallet create --name "content-agent"
 
-## Learn More
+# Issue an API key
+ows policy create-key --wallet content-agent --limit 50 --chain ethereum
 
-To learn more about Next.js, take a look at the following resources:
+# Agent uses the API key to spend
+ows sign tx --chain ethereum --tx <hex> --wallet content-agent
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Hackathon Demo Flow
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. **Create an Agent** → Click "Create Agent" with name, limits, and chains
+2. **Get API Key** → Click "API Key" on the agent card
+3. **Monitor Spending** → Watch the progress bar fill as transactions occur
+4. **Control Access** → Pause, resume, or revoke agents instantly
+5. **View Activity** → See all transactions in real-time with OWS verification
 
-## Deploy on Vercel
+## Screenshots
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Dashboard
+- Total spend across all agents
+- Active/paused agent counts
+- Pending transaction alerts
+- Security status indicator
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Agent Cards
+- Visual spending progress bars
+- Chain indicators
+- Status badges (active/paused/revoked)
+- Quick API key access
+
+### Activity Feed
+- Transaction amounts and statuses
+- Chain-specific badges
+- OWS verification badges
+- Timestamps
+
+## Future Enhancements
+
+- [ ] Connect to real OWS wallet
+- [ ] Multi-signature support (leverage guardian shards)
+- [ ] Time-based spending windows
+- [ ] Vendor allowlists
+- [ ] Anomaly detection alerts
+- [ ] Agent reputation scoring
+
+## License
+
+MIT
