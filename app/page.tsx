@@ -14,8 +14,8 @@ const mockAgents: Agent[] = [
   {
     id: '1',
     name: 'Content Writer Agent',
-    apiKey: 'sk_spendos_cwr7x9kz2m4p8q',
-    apiKeyPrefix: 'sk_spendos_',
+    apiKey: 'demo_spendos_cwr7x9kz2m4p8q',
+    apiKeyPrefix: 'demo_spendos_',
     wallet: '0x742d35Cc6634C0532925a3b844Bc9e7595f8fE21',
     dailyLimit: 50,
     monthlyLimit: 500,
@@ -27,9 +27,9 @@ const mockAgents: Agent[] = [
   {
     id: '2',
     name: 'Image Generator Agent',
-    apiKey: 'sk_spendos_img3x5y7z9a1b2',
-    apiKeyPrefix: 'sk_spendos_',
-    wallet: '0x8Ba1f109551bD432803012645Hac136E65fE1D24',
+    apiKey: 'demo_spendos_img3x5y7z9a1b2',
+    apiKeyPrefix: 'demo_spendos_',
+    wallet: '0x8Ba1f109551bD432803012645Ac136E65fE1D24',
     dailyLimit: 100,
     monthlyLimit: 2000,
     chains: 'ethereum,solana',
@@ -40,8 +40,8 @@ const mockAgents: Agent[] = [
   {
     id: '3',
     name: 'Research Agent',
-    apiKey: 'sk_spendos_res4e6g8h0j2l4',
-    apiKeyPrefix: 'sk_spendos_',
+    apiKey: 'demo_spendos_res4e6g8h0j2l4',
+    apiKeyPrefix: 'demo_spendos_',
     wallet: '0x5B38Da6a701c568545dCfcB03FcB875f56bed6C5',
     dailyLimit: 25,
     monthlyLimit: 250,
@@ -98,6 +98,20 @@ const mockTransactions: Transaction[] = [
     createdAt: '2026-04-04T12:00:00Z',
   },
 ];
+
+function randomHex(bytes: number) {
+  const values = new Uint8Array(bytes);
+  globalThis.crypto.getRandomValues(values);
+  return Array.from(values, (value) => value.toString(16).padStart(2, '0')).join('');
+}
+
+function generateDemoApiKey() {
+  return `demo_spendos_${randomHex(12)}`;
+}
+
+function generateDemoWallet() {
+  return `0x${randomHex(20)}`;
+}
 
 function ProgressBar({ value, max }: { value: number; max: number }) {
   const percentage = Math.min((value / max) * 100, 100);
@@ -194,7 +208,7 @@ function AgentCard({
             className="flex items-center gap-1 px-2.5 py-1 text-xs font-medium rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors"
           >
             <Key className="w-3 h-3" />
-            API Key
+            Demo Key
           </button>
         </div>
       </div>
@@ -241,7 +255,7 @@ function ActivityItem({ transaction }: { transaction: Transaction }) {
         </code>
         <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
           <ShieldCheck className="w-2.5 h-2.5" />
-          OWS
+          OWS-ready
         </span>
       </div>
       
@@ -264,7 +278,9 @@ function ApiKeyModal({
   const [showKey, setShowKey] = useState(false);
   const [copied, setCopied] = useState(false);
   
-  const maskedKey = agent.apiKey?.replace(agent.apiKey.slice(9, -6), '••••••••••') || '';
+  const maskedKey = agent.apiKey
+    ? `${agent.apiKey.slice(0, 14)}••••••${agent.apiKey.slice(-4)}`
+    : '';
 
   const copyToClipboard = () => {
     if (agent.apiKey) navigator.clipboard.writeText(agent.apiKey);
@@ -294,7 +310,7 @@ function ApiKeyModal({
                 <Key className="w-5 h-5 text-violet-600 dark:text-violet-400" />
               </div>
               <div>
-                <h3 className="font-semibold text-zinc-900 dark:text-white">API Key</h3>
+                <h3 className="font-semibold text-zinc-900 dark:text-white">Demo API Key</h3>
                 <p className="text-xs text-zinc-500">{agent.name}</p>
               </div>
             </div>
@@ -306,7 +322,7 @@ function ApiKeyModal({
 
         <div className="p-6 space-y-4">
           <div>
-            <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 block">Secret Key</label>
+            <label className="text-xs font-medium text-zinc-500 dark:text-zinc-400 mb-2 block">Prototype Key</label>
             <div className="flex items-center gap-2">
               <code className="flex-1 px-4 py-3 rounded-lg bg-zinc-50 dark:bg-zinc-800/50 border border-zinc-200 dark:border-zinc-700 text-sm font-mono text-emerald-600 dark:text-emerald-400">
                 {showKey ? agent.apiKey : maskedKey}
@@ -323,25 +339,25 @@ function ApiKeyModal({
           <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/30">
             <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400 flex-shrink-0" />
             <p className="text-xs text-amber-700 dark:text-amber-400">
-              Store this key securely. It will not be shown again after closing.
+              Demo-only key generated in the browser for UI prototyping. It is not persisted or wired to OWS.
             </p>
           </div>
 
           <div className="flex items-center gap-2 p-3 rounded-lg bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-200 dark:border-emerald-500/30">
             <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0" />
             <p className="text-xs text-emerald-700 dark:text-emerald-400">
-              All requests signed and verified by Open Wallet Standard
+              OWS signing and verification are not implemented in this dashboard prototype yet.
             </p>
           </div>
 
           <div className="flex gap-3 pt-2">
             <button onClick={copyToClipboard} className="flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-200 dark:hover:bg-zinc-700 transition-colors text-sm font-medium">
               <Copy className="w-4 h-4" />
-              {copied ? 'Copied!' : 'Copy Key'}
+              {copied ? 'Copied!' : 'Copy Demo Key'}
             </button>
             <button onClick={onRotate} className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-rose-50 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-500/30 transition-colors text-sm font-medium border border-rose-200 dark:border-rose-500/30">
               <RotateCcw className="w-4 h-4" />
-              Rotate Key
+              Rotate Demo Key
             </button>
           </div>
         </div>
@@ -362,13 +378,13 @@ export default function Dashboard() {
   const pendingTx = transactions.filter(t => t.status === 'pending').length;
 
   const createAgent = () => {
-    const apiKey = `sk_spendos_${Math.random().toString(36).substring(2, 15)}`;
+    const apiKey = generateDemoApiKey();
     const agent: Agent = {
-      id: Math.random().toString(36).substring(7),
+      id: randomHex(6),
       name: newAgent.name,
       apiKey,
-      apiKeyPrefix: 'sk_spendos_',
-      wallet: `0x${Math.random().toString(16).substring(2, 42)}`,
+      apiKeyPrefix: 'demo_spendos_',
+      wallet: generateDemoWallet(),
       dailyLimit: newAgent.dailyLimit,
       monthlyLimit: newAgent.monthlyLimit,
       chains: newAgent.chains,
@@ -382,8 +398,8 @@ export default function Dashboard() {
   };
 
   const rotateApiKey = (agentId: string) => {
-    const newKey = `sk_spendos_${Math.random().toString(36).substring(2, 15)}`;
-    setAgents(agents.map(a => a.id === agentId ? { ...a, apiKey: newKey, apiKeyPrefix: 'sk_spendos_' } : a));
+    const newKey = generateDemoApiKey();
+    setAgents(agents.map(a => a.id === agentId ? { ...a, apiKey: newKey, apiKeyPrefix: 'demo_spendos_' } : a));
     setShowApiKeyModal(null);
   };
 
@@ -398,7 +414,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-xl font-bold text-zinc-900 dark:text-white">SpendOS</h1>
-                <p className="text-xs text-zinc-500">Agent Wallet Management</p>
+                <p className="text-xs text-zinc-500">Governance Dashboard Prototype</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
@@ -415,6 +431,15 @@ export default function Dashboard() {
       </header>
 
       <main className="max-w-7xl mx-auto px-6 py-8">
+        <div className="mb-6 rounded-2xl border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 px-5 py-4">
+          <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+            Demo surface only.
+          </p>
+          <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+            Agent records, API keys, and transaction activity on this page are mocked UI data for product demonstration. The real security work in this repo is the Rust guardian recovery crate.
+          </p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-white dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/50 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
@@ -451,13 +476,13 @@ export default function Dashboard() {
 
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="bg-white dark:bg-zinc-900/80 backdrop-blur-sm border border-zinc-200 dark:border-zinc-800/50 rounded-2xl p-5 shadow-sm">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-zinc-500">Security</span>
+              <span className="text-sm text-zinc-500">Prototype</span>
               <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-500/10 flex items-center justify-center">
                 <Shield className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
             </div>
-            <p className="text-3xl font-bold text-emerald-600 dark:text-emerald-400">Protected</p>
-            <p className="text-xs text-zinc-500 mt-1">OWS Policy Engine</p>
+            <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">Demo</p>
+            <p className="text-xs text-zinc-500 mt-1">No live OWS enforcement wired</p>
           </motion.div>
         </div>
 

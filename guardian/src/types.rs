@@ -43,8 +43,13 @@ pub enum RecoveryStatus {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubmittedShard {
     pub guardian_id: String,
-    pub shard_data: Vec<u8>,
     pub submitted_at: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GuardianUnlock {
+    pub guardian_id: String,
+    pub passphrase: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

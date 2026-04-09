@@ -20,6 +20,9 @@ pub enum GuardianError {
     #[error("guardian not found: '{0}'")]
     GuardianNotFound(String),
 
+    #[error("unauthorized action: {0}")]
+    UnauthorizedAction(String),
+
     #[error("duplicate shard from guardian: '{0}'")]
     DuplicateShard(String),
 

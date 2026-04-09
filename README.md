@@ -2,15 +2,15 @@
 
 Agent wallet governance for the Open Wallet Standard. Give agents wallets, not blank checks.
 
-**Live Dashboard:** https://spendos-ten.vercel.app
+**Demo Dashboard:** https://spendos-ten.vercel.app
 
 ## What It Does
 
 SpendOS adds two missing layers to OWS:
 
-1. **Guardian Recovery** (Rust crate) -- Shamir secret sharing, time-locked recovery, dead man's switch with heartbeat monitoring. If an agent wallet owner goes offline, guardians can reconstruct the secret after a configurable time lock.
+1. **Guardian Recovery** (Rust crate) -- Shamir secret sharing, guardian-authenticated recovery, time-locked completion, and dead man's switch with heartbeat monitoring. If an agent wallet owner goes offline, guardians can reconstruct the secret after a configurable time lock.
 
-2. **Spend Governance Dashboard** (Next.js) -- Manage agent spending limits, API keys, chain restrictions, and transaction policies. Monitor activity in real time. Pause or revoke agents instantly.
+2. **Spend Governance Dashboard** (Next.js prototype) -- Institutional UI for agent spending limits, chain restrictions, and governance workflows. The current dashboard is a mocked product surface, not a live policy backend.
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────┐
@@ -31,7 +31,8 @@ Social recovery and dead man's switch for OWS wallets. Builds against OWS core v
 
 - **Shamir Secret Sharing** -- configurable threshold (e.g. 3-of-5)
 - **Guardian setup** with encrypted shard storage (AES-256-GCM via ows-signer)
-- **Time-locked recovery** -- initiate, submit shards, complete or cancel
+- **Guardian-authenticated recovery** -- initiate and cancel only with guardian proof
+- **Time-locked completion** -- submitted recovery proofs are persisted without storing plaintext shard material on disk
 - **Freeze mechanism** -- any guardian with freeze permission can halt a suspicious recovery
 - **Dead man's switch** -- heartbeat monitoring with configurable inactivity trigger and beneficiaries
 
@@ -41,7 +42,7 @@ Social recovery and dead man's switch for OWS wallets. Builds against OWS core v
 # Build
 cargo build --package ows-guardian
 
-# Run tests (7/7 passing)
+# Run tests
 cargo test --package ows-guardian --features fast-kdf
 ```
 
@@ -61,15 +62,19 @@ guardian/src/
 
 ## Dashboard (`app/`)
 
-Agent wallet governance with institutional UI.
+Agent wallet governance prototype with institutional UI.
 
 ### Features
 
 - **Spending limits** -- daily/monthly caps per agent with visual progress bars
 - **Chain restrictions** -- control which chains each agent can transact on
-- **API key management** -- generate, rotate, and revoke agent API keys
-- **Real-time activity feed** -- transaction monitoring with OWS verification
-- **Policy enforcement** -- pause, resume, or revoke agents instantly
+- **Prototype API key UX** -- browser-generated demo keys for showing the management flow
+- **Activity feed prototype** -- mocked transaction stream for UI demonstration
+- **Governance prototype** -- product surface for pause / revoke concepts, not live enforcement
+
+### Important note
+
+The Rust guardian crate is the real security component in this repo. The Next.js dashboard is currently a product prototype backed by mocked data so the UI does not overclaim live policy enforcement or real OWS-signed activity.
 
 ### Run Locally
 
