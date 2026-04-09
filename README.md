@@ -1,120 +1,107 @@
-# SpendOS - Agent Wallet Management
+# SpendOS
 
-**Stripe Dashboard for AI Agents** - Give agents wallets, not blank checks.
+Agent wallet governance for the Open Wallet Standard. Give agents wallets, not blank checks.
 
-SpendOS is a dashboard for managing AI agent spending limits, API keys, and transaction policies. Built for the [Open Wallet Standard](https://github.com/open-wallet-standard/core) hackathon.
+**Live Dashboard:** https://spendos-ten.vercel.app
 
-## Live Demo
+## What It Does
 
-🔗 **https://spendos-ten.vercel.app**
+SpendOS adds two missing layers to OWS:
 
-## What is SpendOS?
+1. **Guardian Recovery** (Rust crate) -- Shamir secret sharing, time-locked recovery, dead man's switch with heartbeat monitoring. If an agent wallet owner goes offline, guardians can reconstruct the secret after a configurable time lock.
 
-SpendOS solves the problem of giving AI agents access to wallets without giving them unlimited funds. It's the missing trust layer for autonomous agents.
+2. **Spend Governance Dashboard** (Next.js) -- Manage agent spending limits, API keys, chain restrictions, and transaction policies. Monitor activity in real time. Pause or revoke agents instantly.
 
 ```
 ┌─────────────┐      ┌──────────────┐      ┌─────────┐
-│  AI Agent  │ ──── │   SpendOS   │ ──── │   OWS   │
-│             │      │  Dashboard  │      │ Wallet  │
-└─────────────┘      │             │      └─────────┘
-                      │ • API Keys  │
-                      │ • Limits    │
-                      │ • Policies  │
-                      │ • Audit Logs│
-                      └──────────────┘
+│  AI Agent   │ ──── │   SpendOS    │ ──── │   OWS   │
+│             │      │  Governance  │      │ Wallet  │
+└─────────────┘      └──────────────┘      └─────────┘
+                      • Guardian Recovery (Rust)
+                      • Spend Limits & Policies
+                      • API Key Management
+                      • Dead Man's Switch
 ```
 
-## Features
+## Guardian Crate (`guardian/`)
 
-- **Agent Wallet Management** - Create and manage multiple agent wallets
-- **Spending Limits** - Set daily/monthly limits per agent
-- **Chain Restrictions** - Control which chains each agent can use
-- **API Key Generation** - Secure API keys for agent authentication
-- **Real-time Activity** - Monitor all transactions
-- **Policy Enforcement** - Pause, resume, or revoke agents instantly
+Social recovery and dead man's switch for OWS wallets. Builds against OWS core v1.2.4.
 
-## Track 02: Agent Spend Governance & Identity
+### Features
 
-This project demonstrates:
-- Dead man's switch for autonomous agents
-- Policy-based spending controls
-- Agent identity and access management
+- **Shamir Secret Sharing** -- configurable threshold (e.g. 3-of-5)
+- **Guardian setup** with encrypted shard storage (AES-256-GCM via ows-signer)
+- **Time-locked recovery** -- initiate, submit shards, complete or cancel
+- **Freeze mechanism** -- any guardian with freeze permission can halt a suspicious recovery
+- **Dead man's switch** -- heartbeat monitoring with configurable inactivity trigger and beneficiaries
 
-## Tech Stack
-
-- **Framework:** Next.js 16 + TypeScript
-- **Styling:** Tailwind CSS (Institutional Stripe aesthetic)
-- **Animations:** Framer Motion
-- **Icons:** Lucide React
-- **Database:** SQLite (Prisma) - production-ready for Supabase/PostgreSQL
-
-## Getting Started
+### Build and Test
 
 ```bash
-# Clone the repo
-git clone https://github.com/dolepee/spendos.git
-cd spendos
+# Build
+cargo build --package ows-guardian
 
-# Install dependencies
+# Run tests (7/7 passing)
+cargo test --package ows-guardian --features fast-kdf
+```
+
+### Architecture
+
+```
+guardian/src/
+  shamir.rs          # Shamir secret splitting and reconstruction
+  setup.rs           # Guardian configuration and shard encryption
+  recovery.rs        # Recovery flow: initiate, submit, complete, cancel, freeze
+  heartbeat.rs       # Dead man's switch and heartbeat recording
+  guardian_store.rs   # Persistent guardian config storage
+  recovery_store.rs   # Recovery request state storage
+  types.rs           # GuardianConfig, RecoveryRequest, Beneficiary, etc.
+  error.rs           # GuardianError type
+```
+
+## Dashboard (`app/`)
+
+Agent wallet governance with institutional UI.
+
+### Features
+
+- **Spending limits** -- daily/monthly caps per agent with visual progress bars
+- **Chain restrictions** -- control which chains each agent can transact on
+- **API key management** -- generate, rotate, and revoke agent API keys
+- **Real-time activity feed** -- transaction monitoring with OWS verification
+- **Policy enforcement** -- pause, resume, or revoke agents instantly
+
+### Run Locally
+
+```bash
 npm install
-
-# Run development server
 npm run dev
-
 # Open http://localhost:3000
 ```
 
-## OWS Integration
+## Tech Stack
 
-SpendOS is designed to work with the [Open Wallet Standard](https://github.com/open-wallet-standard/core) CLI (`ows`):
+| Layer | Stack |
+|-------|-------|
+| Guardian crate | Rust, Shamir (sharks), AES-256-GCM, scrypt, chrono |
+| Dashboard | Next.js 16, TypeScript, Tailwind CSS, Framer Motion, Prisma |
+| OWS integration | ows-core, ows-signer (git dependency) |
 
-```bash
-# Create an agent wallet
-ows wallet create --name "content-agent"
+## Project Structure
 
-# Issue an API key
-ows policy create-key --wallet content-agent --limit 50 --chain ethereum
-
-# Agent uses the API key to spend
-ows sign tx --chain ethereum --tx <hex> --wallet content-agent
 ```
-
-## Hackathon Demo Flow
-
-1. **Create an Agent** → Click "Create Agent" with name, limits, and chains
-2. **Get API Key** → Click "API Key" on the agent card
-3. **Monitor Spending** → Watch the progress bar fill as transactions occur
-4. **Control Access** → Pause, resume, or revoke agents instantly
-5. **View Activity** → See all transactions in real-time with OWS verification
-
-## Screenshots
-
-### Dashboard
-- Total spend across all agents
-- Active/paused agent counts
-- Pending transaction alerts
-- Security status indicator
-
-### Agent Cards
-- Visual spending progress bars
-- Chain indicators
-- Status badges (active/paused/revoked)
-- Quick API key access
-
-### Activity Feed
-- Transaction amounts and statuses
-- Chain-specific badges
-- OWS verification badges
-- Timestamps
-
-## Future Enhancements
-
-- [ ] Connect to real OWS wallet
-- [ ] Multi-signature support (leverage guardian shards)
-- [ ] Time-based spending windows
-- [ ] Vendor allowlists
-- [ ] Anomaly detection alerts
-- [ ] Agent reputation scoring
+spendos/
+  guardian/           # ows-guardian Rust crate
+    Cargo.toml
+    src/
+  app/                # Next.js dashboard
+    page.tsx
+    layout.tsx
+    globals.css
+  lib/                # Dashboard utilities
+  prisma/             # Database schema
+  Cargo.toml          # Workspace root
+```
 
 ## License
 
